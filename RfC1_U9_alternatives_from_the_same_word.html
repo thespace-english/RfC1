@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RfC1_U9_alternatives_from_the_same_word</title>
+    <style>
+        :root { --warm-green: #f2f7f2; --teal: #007e7a; --dark: #1a1a1a; --gray: #e0e0e0; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--warm-green); color: var(--dark); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        #container { background: white; width: 100%; max-width: 850px; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); min-height: 600px; box-sizing: border-box; }
+        .page { display: none; } .active { display: block; }
+        h2 { color: var(--teal); border-bottom: 2px solid var(--warm-green); padding-bottom: 10px; margin-top: 0; }
+        input[type="text"] { width: 100%; padding: 15px; margin: 25px 0; border: 2px solid var(--gray); border-radius: 8px; font-size: 18px; box-sizing: border-box; }
+        button { background: var(--teal); color: white; border: none; padding: 15px 40px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; transition: 0.3s; margin-bottom: 10px; }
+        button:hover { background: #005f5c; }
+        .skip-btn { background: transparent; color: var(--teal); border: 1px solid var(--teal); margin-top: 20px; }
+        .skip-btn:hover { background: #f0f7f7; }
+        .drop-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .drop-zone { background: #fafafa; border: 2px dashed var(--gray); padding: 20px; border-radius: 10px; min-height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; }
+        .word-bank { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 20px; }
+        .word { background: var(--teal); color: white; padding: 10px 18px; border-radius: 6px; cursor: grab; font-weight: 500; }
+        .dict-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .dict-item { background: #fff; border: 1px solid #eee; padding: 12px; border-radius: 8px; font-size: 13px; text-align: left; }
+        .dict-item b { color: var(--teal); display: block; font-size: 15px; margin-bottom: 3px; }
+        .q-row { margin-bottom: 15px; padding: 15px; border-bottom: 1px solid #f0f0f0; line-height: 1.6; font-size: 16px; text-align: left; }
+        select { padding: 6px; border-radius: 4px; border: 1px solid var(--teal); font-size: 15px; margin: 0 5px; }
+        .correct { background: #e8f5e9 !important; border-color: #2e7d32; }
+        .wrong { background: #ffebee !important; border-color: #c62828; }
+        .chart { width: 160px; height: 160px; border-radius: 50%; margin: 20px auto; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; background: #eee; }
+        .chart-inner { background: white; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <div id="p0" class="page active">
+        <h2>Advanced Lexical Assessment</h2>
+        <p>Unit: RfC1_U9_alternatives_from_the_same_word</p>
+        <input type="text" id="studentName" placeholder="Enter your name...">
+        <button onclick="startApp()">Start Training</button>
+    </div>
+
+    <div id="p1" class="page">
+        <h2>Semantic Matching</h2>
+        <p id="match-counter" style="color: var(--teal); font-weight: bold;"></p>
+        <div class="drop-zones" id="zones"></div>
+        <div class="word-bank" id="bank"></div>
+        <button class="skip-btn" onclick="renderDictionary()">Skip to Practice</button>
+    </div>
+
+    <div id="p2" class="page">
+        <h2>Vocabulary Reference</h2>
+        <div id="dictionary-content" class="dict-container"></div>
+        <button onclick="showPage('p3')">Proceed to Practice</button>
+    </div>
+
+    <div id="p3" class="page">
+        <h2>Contextual Application</h2>
+        <div id="quiz-list"></div>
+        <button onclick="submitResults()">Finalize Assessment</button>
+    </div>
+
+    <div id="p4" class="page" style="text-align: center;">
+        <h2>Results</h2>
+        <div class="chart" id="chart-res"><div class="chart-inner" id="chart-text"></div></div>
+        <p id="score-text" style="font-size: 20px; font-weight: bold;"></p>
+        <p>Your results have been sent to the spreadsheet.</p>
+    </div>
+</div>
+
+<script>
+const fileTitle = "RfC1_U9_alternatives_from_the_same_word";
+const scriptURL = "https://script.google.com/macros/s/AKfycbwbs7mZA2ehSO4vKbaVgi2m8boNqnfSpEN55bmBcaWs5cBTwpyU-xxA2UHVoy1Jiwd2kw/exec";
+
+const vocabData = [
+    { p: ["Inconsiderate", "Inconsiderable"], d: ["Lacking thought or regard for others.", "Small, insignificant, or not worth noting."] },
+    { p: ["Timeless", "Untimely"], d: ["Eternal; not affected by the passage of years.", "Happening too soon or at an unsuitable time."] },
+    { p: ["Adopted", "Adoptive"], d: ["Chosen as one's own (e.g. a country or child).", "The person or entity performing the adoption."] },
+    { p: ["Deceitful", "Deceptive"], d: ["Characterized by active lying or dishonesty.", "Giving a false impression; misleading by appearance."] },
+    { p: ["Supporting", "Supportive"], d: ["Providing factual evidence or documentation.", "Providing emotional help and encouragement."] },
+    { p: ["Identification", "Identity"], d: ["The process of verifying who someone is (or an ID).", "The essential characteristics that make a person."] },
+    { p: ["Consulting", "Consultative"], d: ["The act of seeking advice (e.g. a room/expert).", "An advisory process or committee for discussion."] },
+    { p: ["Hardness", "Hardship"], d: ["The physical quality of being solid or rigid.", "Difficult circumstances; lack of basic needs."] },
+    { p: ["Advisory", "Advisable"], d: ["A role focused on making recommendations.", "Sensible, wise, or recommended to do."] },
+    { p: ["Respectable", "Respective"], d: ["Worthy of respect; socially acceptable.", "Belonging separately to each person mentioned."] }
+];
+
+const quizItems = [
+    { s: "Parking your car across two spaces is very ___ of you.", opts: ["inconsiderate", "inconsiderable"], a: "inconsiderate" },
+    { s: "The project's budget surplus was ___, only a few dollars.", opts: ["inconsiderate", "inconsiderable"], a: "inconsiderable" },
+    { s: "The Parthenon is a ___ symbol of Greek culture.", opts: ["timeless", "untimely"], a: "timeless" },
+    { s: "The actor's ___ death at age 25 shocked his fans.", opts: ["timeless", "untimely"], a: "untimely" },
+    { s: "She has lived in Paris for so long it is her ___ home.", opts: ["adopted", "adoptive"], a: "adopted" },
+    { s: "Her ___ parents have always been very open with her.", opts: ["adopted", "adoptive"], a: "adoptive" },
+    { s: "A ___ person will often omit key facts to mislead you.", opts: ["deceitful", "deceptive"], a: "deceitful" },
+    { s: "The size of the apartment is ___; it's bigger than it looks.", opts: ["deceitful", "deceptive"], a: "deceptive" },
+    { s: "The police found ___ evidence at the crime scene.", opts: ["supporting", "supportive"], a: "supporting" },
+    { s: "My manager was incredibly ___ when I was ill.", opts: ["supporting", "supportive"], a: "supportive" },
+    { s: "Security will ask for ___ before you enter the lab.", opts: ["identification", "identity"], a: "identification" },
+    { s: "The witness couldn't confirm the attacker's ___.", opts: ["identification", "identity"], a: "identity" },
+    { s: "The specialist's ___ room was quiet and professional.", opts: ["consulting", "consultative"], a: "consulting" },
+    { s: "The council acts in a ___ capacity for the mayor.", opts: ["consulting", "consultative"], a: "consultative" },
+    { s: "The ___ of the gemstone determines its value.", opts: ["hardness", "hardship"], a: "hardness" },
+    { s: "The war caused immense ___ for thousands of families.", opts: ["hardness", "hardship"], a: "hardship" },
+    { s: "He holds an ___ position on the international board.", opts: ["advisory", "advisable"], a: "advisory" },
+    { s: "It is ___ to book a table if you plan to eat after 8 PM.", opts: ["advisory", "advisable"], a: "advisable" },
+    { s: "He comes from a highly ___ family in the medical field.", opts: ["respectable", "respective"], a: "respectable" },
+    { s: "The winners returned to their ___ countries with medals.", opts: ["respectable", "respective"], a: "respective" }
+];
+
+let userName = "";
+let matchPairIndex = 0;
+let quizScore = 0;
+let shuffledVocab = [...vocabData].sort(() => Math.random() - 0.5);
+
+function startApp() {
+    userName = document.getElementById('studentName').value;
+    if (!userName) return alert("Please enter your name.");
+    showPage('p1');
+    renderMatch();
+}
+
+function renderMatch() {
+    if (matchPairIndex >= shuffledVocab.length) { renderDictionary(); return; }
+    document.getElementById('match-counter').innerText = `Pair ${matchPairIndex + 1} of ${shuffledVocab.length}`;
+    const pair = shuffledVocab[matchPairIndex];
+    document.getElementById('zones').innerHTML = `
+        <div class="drop-zone" data-w="${pair.p[0]}" ondragover="allow(event)" ondrop="drop(event)">${pair.d[0]}</div>
+        <div class="drop-zone" data-w="${pair.p[1]}" ondragover="allow(event)" ondrop="drop(event)">${pair.d[1]}</div>
+    `;
+    const bank = [...pair.p].sort(() => Math.random() - 0.5);
+    document.getElementById('bank').innerHTML = bank.map(w => `<div class="word" draggable="true" ondragstart="drag(event)">${w}</div>`).join('');
+}
+
+function drag(e) { e.dataTransfer.setData("text", e.target.innerText); }
+function allow(e) { e.preventDefault(); }
+function drop(e) {
+    const word = e.dataTransfer.getData("text");
+    if (e.target.dataset.w === word) {
+        e.target.innerHTML = `<strong>${word}</strong>`;
+        e.target.style.background = "#e8f5e9";
+        const bank = document.getElementById('bank');
+        for(let child of bank.children) { if(child.innerText === word) { child.remove(); break; } }
+        if (bank.children.length === 0) { matchPairIndex++; setTimeout(renderMatch, 700); }
+    }
+}
+
+function renderDictionary() {
+    showPage('p2');
+    const dict = document.getElementById('dictionary-content');
+    dict.innerHTML = "";
+    vocabData.forEach(v => {
+        dict.innerHTML += `<div class="dict-item"><b>${v.p[0]}</b>${v.d[0]}</div>
+                           <div class="dict-item"><b>${v.p[1]}</b>${v.d[1]}</div>`;
+    });
+}
+
+function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+    if(id === 'p3') loadQuiz();
+}
+
+function loadQuiz() {
+    const list = document.getElementById('quiz-list');
+    list.innerHTML = "";
+    const shuffledQuiz = [...quizItems].sort(() => Math.random() - 0.5);
+    shuffledQuiz.forEach((q, i) => {
+        list.innerHTML += `<div class="q-row">${i+1}. ${q.s.replace('___', `<select onchange="checkQ(this, '${q.a}')"><option value="">?</option><option value="${q.opts[0]}">${q.opts[0]}</option><option value="${q.opts[1]}">${q.opts[1]}</option></select>`)}</div>`;
+    });
+}
+
+function checkQ(el, correct) {
+    if (el.value === correct) { el.className = "correct"; quizScore++; } else { el.className = "wrong"; }
+    el.disabled = true;
+}
+
+function submitResults() {
+    showPage('p4');
+    const total = quizItems.length;
+    const perc = (quizScore / total) * 100;
+    document.getElementById('score-text').innerText = `${quizScore} / ${total}`;
+    document.getElementById('chart-text').innerText = `${Math.round(perc)}%`;
+    document.getElementById('chart-res').style.background = `conic-gradient(var(--teal) ${perc}%, #eee 0%)`;
+
+    const allSelects = document.querySelectorAll('#quiz-list select');
+    const userAnswers = Array.from(allSelects).map((sel, index) => {
+        return `${index + 1}) ${sel.value || 'no answer'}`;
+    }).join('; ');
+
+    const params = new URLSearchParams();
+    params.append('name', userName);
+    params.append('title', fileTitle);
+    params.append('result', `${quizScore}/${total}`);
+    params.append('answers', userAnswers);
+
+    fetch(scriptURL, {
+        method: 'POST',
+        body: params,
+        mode: 'no-cors'
+    }).catch(err => console.log('Data transmission error:', err));
+}
+</script>
+</body>
+</html>
