@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RfC1_Test_9</title>
+    <style>
+        :root {
+            --bg-color: #f7faf7;
+            --accent-teal: #007e7a;
+            --text-dark: #1a1a1a;
+            --circle-color: rgba(0, 126, 122, 0.05);
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .decoration {
+            position: fixed;
+            top: 0; right: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: -1;
+        }
+        .circle-big {
+            position: absolute; width: 450px; height: 450px; border-radius: 50%;
+            background: var(--circle-color); top: -100px; right: -100px;
+        }
+        .circle-small-1 {
+            position: absolute; width: 180px; height: 180px; border-radius: 50%;
+            background: var(--circle-color); top: 80px; right: 300px;
+        }
+        .circle-small-2 {
+            position: absolute; width: 120px; height: 120px; border-radius: 50%;
+            background: var(--circle-color); top: 250px; right: 180px;
+        }
+
+        #test-container {
+            width: 95%; max-width: 900px; background: white;
+            padding: 60px; margin: 40px 0; border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+            z-index: 1;
+        }
+
+        .page { display: none; }
+        .active { display: block; }
+
+        h1 { font-size: 54px; color: var(--accent-teal); margin-top: 0; }
+        h2 { font-size: 32px; margin-bottom: 30px; border-bottom: 2px solid var(--bg-color); padding-bottom: 15px; }
+        p { font-size: 20px; line-height: 1.6; }
+
+        input[type="text"], select {
+            padding: 8px 12px; border: 2px solid #ddd; border-radius: 8px;
+            font-size: 20px; outline: none; font-family: inherit;
+        }
+        select { cursor: pointer; background-color: #fff; }
+        
+        .name-input { width: 100%; margin: 20px 0 40px; padding: 15px; }
+
+        .task-item { margin-bottom: 25px; font-size: 20px; line-height: 1.8; }
+        
+        .inline-input {
+            border: none; border-bottom: 2px solid var(--accent-teal);
+            background: #f1f5f1; padding: 2px 8px; font-size: 20px;
+            font-family: inherit; color: #000; outline: none;
+            margin: 0 4px;
+        }
+        .wide-input { width: 350px; }
+        .short-input { width: 140px; }
+
+        .orig-sentence { color: #666; font-style: italic; font-size: 18px; margin-bottom: 5px; display: block; }
+
+        .section-intro { text-align: center; padding: 100px 0; }
+        .section-intro h1 { font-size: 70px; }
+
+        .btn-container { margin-top: 50px; display: flex; gap: 20px; }
+        button {
+            background: var(--accent-teal); color: white; border: none;
+            padding: 18px 40px; font-size: 20px; border-radius: 12px;
+            cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        button:hover { background: #005f5c; }
+        .back-btn { background: #eee; color: #555; }
+
+        .results-table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 18px; }
+        .results-table th, .results-table td { padding: 15px; border: 1px solid #eee; text-align: left; }
+        .res-correct { color: #27ae60; font-weight: bold; }
+        .res-wrong { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="decoration">
+    <div class="circle-big"></div>
+    <div class="circle-small-1"></div>
+    <div class="circle-small-2"></div>
+</div>
+
+<div id="test-container">
+    <div id="page-0" class="page active">
+        <h1>RfC1 Test 9</h1>
+        <p>Please enter your first and last name:</p>
+        <input type="text" id="studentName" class="name-input" placeholder="e.g. John Smith">
+        <button onclick="nextPage()">Start Test</button>
+    </div>
+
+    <div id="page-1" class="page section-intro">
+        <h1>Vocabulary</h1>
+        <button onclick="nextPage()">Begin Section</button>
+    </div>
+
+    <div id="page-2" class="page">
+        <h2>Task 1: Choose the correct options</h2>
+        <div id="t1-container"></div>
+        <div class="btn-container"><button onclick="nextPage()">Next Page</button></div>
+    </div>
+
+    <div id="page-3" class="page">
+        <h2>Task 2: Complete the words</h2>
+        <div id="t2-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="nextPage()">Next Page</button>
+        </div>
+    </div>
+
+    <div id="page-4" class="page section-intro">
+        <h1>LANGUAGE FOCUS</h1>
+        <p>Creating emphasis</p>
+        <button onclick="nextPage()">Begin Section</button>
+    </div>
+
+    <div id="page-5" class="page">
+        <h2>Task 3: Transformation</h2>
+        <div id="t3-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="nextPage()">Next Page</button>
+        </div>
+    </div>
+
+    <div id="page-6" class="page">
+        <h2>Task 4: Complete with one word</h2>
+        <div id="t4-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="nextPage()">Next Page</button>
+        </div>
+    </div>
+
+    <div id="page-7" class="page section-intro">
+        <h1>Word Formation</h1>
+        <button onclick="nextPage()">Begin Section</button>
+    </div>
+
+    <div id="page-8" class="page">
+        <h2>Task 5: Word Formation</h2>
+        <div id="t5-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="finishTest()">Finish Test</button>
+        </div>
+    </div>
+
+    <div id="page-results" class="page">
+        <h2>Results</h2>
+        <p id="score-summary" style="font-size: 26px; font-weight: bold;"></p>
+        <div id="details"></div>
+    </div>
+</div>
+
+<script>
+const scriptURL = 'https://script.google.com/macros/s/AKfycbwbs7mZA2ehSO4vKbaVgi2m8boNqnfSpEN55bmBcaWs5cBTwpyU-xxA2UHVoy1Jiwd2kw/exec';
+let currentPage = 0;
+
+const task1Data = [
+    { s: "1. We left early for the airport, which {v} to be a good idea as there was very heavy traffic.", o: ["turned out", "turned up"], a: "turned out" },
+    { s: "2. It took a while before the sleeping tablets {v}. After they did, I slept very well.", o: ["kicked in", "kicked on"], a: "kicked in" },
+    { s: "3. If I {v} trouble while I’m abroad – if I lose my passport, for example – what should I do?", o: ["run around", "run into"], a: "run into" },
+    { s: "4. We’re {v} very early tomorrow morning, so we shouldn’t stay up late.", o: ["setting off", "setting up"], a: "setting off" },
+    { s: "5. I {v} with the aim of cycling at least 50 kilometres a day. In the end, I managed much more.", o: ["set about", "set out"], a: "set out" },
+    { s: "6. Reaching the top of the mountain was {v} for her, but she got there through sheer determination.", o: ["gruelling", "intrepid"], a: "gruelling" },
+    { s: "7. Death Valley in California is one of the world’s most {v} places, receiving virtually no rainfall.", o: ["arid", "swirling"], a: "arid" },
+    { s: "8. Our hotel was in an {v} spot near a river, where you could see deer every evening.", o: ["idyllic", "intrepid"], a: "idyllic" },
+    { s: "9. Ashley isn’t highly qualified, but he {v} in most situations with his charm and personality.", o: ["wins out", "wins through"], a: "wins through" },
+    { s: "10. Pamela is the least {v} person I know, so I was absolutely astonished when she told me she was backpacking across Asia.", o: ["intrepid", "swirling"], a: "intrepid" },
+    { s: "11. The food was absolutely {v}. I’ve never tasted anything so good.", o: ["arid", "exquisite"], a: "exquisite" },
+    { s: "12. It’s quite something to watch the {v} mists gradually disappear as it gets brighter and hotter.", o: ["gruelling", "swirling"], a: "swirling" }
+];
+
+const task2Data = [
+    { s: "1. I had a heated ar", a: ["gument", "argument"], e: " with my partner about where to go on holiday." },
+    { s: "2. I lost my t", a: ["emper", "temper"], e: " with someone who tried to push into the queue." },
+    { s: "3. You could see by her face that she was absolutely se", a: ["ething", "seething"], e: " with rage." },
+    { s: "4. It’s no good throwing a t", a: ["antrum", "tantrum"], e: " like a child, you’re not going out in this weather." },
+    { s: "5. My dad will go be", a: ["rserk", "berserk"], e: " when he finds out I’ve damaged his car." },
+    { s: "6. I don’t tend to fly off the h", a: ["andle", "handle"], e: " when I get stressed." },
+    { s: "7. I’m a bit cr", a: ["oss", "cross"], e: " with Lydia for forgetting to order the cake." },
+    { s: "8. There were a lot of ira", a: ["te", "irate"], e: " passengers at the airport demanding compensation." },
+    { s: "9. After a stressful day, I usually go for a run to try and let off s", a: ["team", "steam"], e: "." },
+    { s: "10. I apologise for my ou", a: ["tburst", "outburst"], e: " yesterday. I hardly ever shout." }
+];
+
+const task3Data = [
+    { o: "We went to Switzerland for our last holiday.", s: "1. It was Switzerland ", g: ["that we went to"], e: " for our last holiday." },
+    { o: "I spent most of my time skiing.", s: "2. What ", g: ["I spent most of my time doing"], e: " was skiing." },
+    { o: "I loved the views from the top of the mountain.", s: "3. What ", g: ["I loved were the views"], e: " from the top of the mountain." },
+    { o: "We enjoyed the food the most.", s: "4. It ", g: ["was the food that"], e: " we enjoyed the most." },
+    { o: "I didn’t know much about Swiss food until I actually went to Switzerland.", s: "5. It ", g: ["wasn't until I actually went", "wasn't until I went"], e: " to Switzerland that I found out about Swiss food." },
+    { o: "I’d love to go there again.", s: "6. What ", g: ["I'd love is to", "I'd love to do is"], e: " go there again." }
+];
+
+const task4Data = [
+    { s: "1. I was feeling very tired and couldn’t concentrate, so ", g: ["what"], e: " I did was nap for a few hours." },
+    { s: "2. The flight was mostly OK. ", g: ["It"], e: " was during the landing that I got nervous because it was very windy outside." },
+    { s: "3. I don’t know why my uncle goes on holiday. ", g: ["All"], e: " he ever does is stay inside the hotel working." },
+    { s: "4. I live in a country where winters are quite warm. ", g: ["It"], e: " was only when I was 18 that I saw snow for the first time." },
+    { s: "5. I can’t believe she’s a grandmother. What I’d like to know ", g: ["is"], e: " how she manages to seem so young." }
+];
+
+const task5Data = [
+    { p: "1. IMAGINE", s: "a. I used to have an ", g: ["imaginary"], e: " friend as a child." },
+    { p: "", s: "b. I was an ", g: ["imaginative"], e: " child, always making up stories." },
+    { p: "2. DECEIVE", s: "a. Jonathan was being ", g: ["deceitful"], e: " on his CV." },
+    { p: "", s: "b. He makes it seem ", g: ["deceptively"], e: " simple, when it really isn’t." },
+    { p: "3. CONSIDER", s: "a. You should be more ", g: ["considerate"], e: " of your neighbours." },
+    { p: "", s: "b. I spent a ", g: ["considerable"], e: " amount of time on my work." },
+    { p: "4. ADVISE", s: "a. Due to bad weather conditions, police say it’s ", g: ["inadvisable"], e: " to make inessential journeys." },
+    { p: "", s: "b. My career ", g: ["advisor", "adviser"], e: " at school suggested that I would make a good teacher." },
+    { p: "5. RESPECT", s: "a. I ", g: ["respectfully"], e: " disagree with you." },
+    { p: "", s: "b. Environmental problems in their ", g: ["respective"], e: " countries." },
+    { p: "6. IDENTIFY", s: "a. Please bring a form of ", g: ["identification"], e: " with you." },
+    { p: "", s: "b. Jack is always very ", g: ["identifiable"], e: " from his colourful clothes." },
+    { p: "7. HARD", s: "a. My grandparents suffered great ", g: ["hardship"], e: " when they were growing up." },
+    { p: "", s: "b. Diamonds are famous for their ", g: ["hardness"], e: "." },
+    { p: "8. SUPPORT", s: "a. I’d like to thank my parents, who have always been very ", g: ["supportive"], e: "." },
+    { p: "", s: "b. The ", g: ["supporters"], e: " were devastated when their team lost." }
+];
+
+function buildTest() {
+    const t1 = document.getElementById('t1-container');
+    task1Data.forEach((d, i) => {
+        const html = d.s.replace('{v}', `<select id="t1-${i}"><option value="">---</option>${d.o.map(o => `<option value="${o}">${o}</option>`).join('')}</select>`);
+        t1.innerHTML += `<div class="task-item">${html}</div>`;
+    });
+
+    const t2 = document.getElementById('t2-container');
+    task2Data.forEach((d, i) => {
+        t2.innerHTML += `<div class="task-item">${d.s}<input type="text" id="t2-${i}" class="inline-input short-input">${d.e}</div>`;
+    });
+
+    const t3 = document.getElementById('t3-container');
+    task3Data.forEach((d, i) => {
+        t3.innerHTML += `<div class="task-item"><span class="orig-sentence">${d.o}</span>${d.s}<input type="text" id="t3-${i}" class="inline-input wide-input">${d.e}</div>`;
+    });
+
+    const t4 = document.getElementById('t4-container');
+    task4Data.forEach((d, i) => {
+        t4.innerHTML += `<div class="task-item">${d.s}<input type="text" id="t4-${i}" class="inline-input short-input">${d.e}</div>`;
+    });
+
+    const t5 = document.getElementById('t5-container');
+    task5Data.forEach((d, i) => {
+        const prompt = d.p ? `<div style="font-weight:bold; margin-top:20px; color:var(--accent-teal)">${d.p}</div>` : '';
+        t5.innerHTML += `${prompt}<div class="task-item">${d.s}<input type="text" id="t5-${i}" class="inline-input short-input">${d.e}</div>`;
+    });
+}
+
+function nextPage() {
+    if (currentPage === 0 && !document.getElementById('studentName').value.trim()) return alert("Please enter your name!");
+    document.getElementById(`page-${currentPage}`).classList.remove('active');
+    currentPage++;
+    document.getElementById(`page-${currentPage}`).classList.add('active');
+    window.scrollTo(0,0);
+}
+
+function prevPage() {
+    document.getElementById(`page-${currentPage}`).classList.remove('active');
+    currentPage--;
+    document.getElementById(`page-${currentPage}`).classList.add('active');
+}
+
+function finishTest() {
+    let score = 0;
+    let total = 0;
+    let log = [];
+    let table = `<table class="results-table"><tr><th>№</th><th>Your Answer</th><th>Correct Answer</th></tr>`;
+
+    const check = (data, prefix, getVal, getAns) => {
+        data.forEach((d, i) => {
+            total++;
+            const val = getVal(i).trim().toLowerCase();
+            const correct = getAns(d);
+            
+            // Проверка на массив правильных ответов
+            const isOk = Array.isArray(correct) ? 
+                         correct.some(c => val === c.toLowerCase()) : 
+                         val === (correct ? correct.toLowerCase() : "");
+            
+            if (isOk) score++;
+            log.push(val || "no answer");
+            const displayCorrect = Array.isArray(correct) ? correct.join(" / ") : correct;
+            table += `<tr><td>${prefix}${i+1}</td><td class="${isOk?'res-correct':'res-wrong'}">${val||'-'}</td><td>${displayCorrect}</td></tr>`;
+        });
+    };
+
+    check(task1Data, "1.", (i)=>document.getElementById(`t1-${i}`).value, (d)=>d.a);
+    check(task2Data, "2.", (i)=>document.getElementById(`t2-${i}`).value, (d)=>d.a);
+    check(task3Data, "3.", (i)=>document.getElementById(`t3-${i}`).value, (d)=>d.g);
+    check(task4Data, "4.", (i)=>document.getElementById(`t4-${i}`).value, (d)=>d.g);
+    check(task5Data, "5.", (i)=>document.getElementById(`t5-${i}`).value, (d)=>d.g);
+
+    const perc = Math.round((score / total) * 100);
+    const finalStr = `${score}/${total} (${perc}%)`;
+    
+    document.getElementById('page-8').classList.remove('active');
+    document.getElementById('page-results').classList.add('active');
+    document.getElementById('score-summary').innerText = `Your result: ${finalStr}`;
+    document.getElementById('details').innerHTML = table + `</table>`;
+
+    const p = new URLSearchParams();
+    p.append('name', document.getElementById('studentName').value);
+    p.append('result', finalStr);
+    p.append('title', "RfC1_Test_9");
+    p.append('answers', log.join(' | '));
+    fetch(scriptURL, { method: 'POST', body: p, mode: 'no-cors' });
+}
+
+buildTest();
+</script>
+</body>
+</html>
