@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RfC1_Test_8</title>
+    <style>
+        :root {
+            --bg-color: #f7faf7;
+            --accent-teal: #007e7a;
+            --text-dark: #1a1a1a;
+            --circle-color: rgba(0, 126, 122, 0.05);
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .decoration {
+            position: fixed;
+            top: 0; right: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: -1;
+        }
+        .circle-big {
+            position: absolute; width: 450px; height: 450px; border-radius: 50%;
+            background: var(--circle-color); top: -100px; right: -100px;
+        }
+        .circle-small-1 {
+            position: absolute; width: 180px; height: 180px; border-radius: 50%;
+            background: var(--circle-color); top: 80px; right: 300px;
+        }
+
+        #test-container {
+            width: 95%; max-width: 900px; background: white;
+            padding: 60px; margin: 40px 0; border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+            z-index: 1;
+        }
+
+        .page { display: none; }
+        .active { display: block; }
+
+        h1 { font-size: 54px; color: var(--accent-teal); margin-top: 0; }
+        h2 { font-size: 32px; margin-bottom: 30px; border-bottom: 2px solid var(--bg-color); padding-bottom: 15px; }
+        p { font-size: 20px; line-height: 1.6; }
+
+        input[type="text"], select {
+            padding: 8px 12px; border: 2px solid #ddd; border-radius: 8px;
+            font-size: 20px; outline: none; font-family: inherit;
+        }
+        select { cursor: pointer; background-color: #fff; min-width: 200px; }
+        
+        .name-input { width: 100%; margin: 20px 0 40px; padding: 15px; box-sizing: border-box; }
+
+        .task-item { margin-bottom: 25px; font-size: 20px; line-height: 1.8; }
+        
+        .inline-input {
+            border: none; border-bottom: 2px solid var(--accent-teal);
+            background: #f1f5f1; padding: 2px 8px; font-size: 20px;
+            font-family: inherit; color: #000; outline: none;
+            margin: 0 4px;
+        }
+        .short-input { width: 140px; }
+
+        .section-intro { text-align: center; padding: 100px 0; }
+        .btn-container { margin-top: 50px; display: flex; gap: 20px; }
+        
+        button {
+            background: var(--accent-teal); color: white; border: none;
+            padding: 18px 40px; font-size: 20px; border-radius: 12px;
+            cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        button:hover { background: #005f5c; }
+        .back-btn { background: #eee; color: #555; }
+
+        .results-table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 18px; }
+        .results-table th, .results-table td { padding: 15px; border: 1px solid #eee; text-align: left; }
+        .res-correct { color: #27ae60; font-weight: bold; }
+        .res-wrong { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="decoration">
+    <div class="circle-big"></div>
+    <div class="circle-small-1"></div>
+</div>
+
+<div id="test-container">
+    <div id="page-0" class="page active">
+        <h1>RfC1 Test 8</h1>
+        <p>Please enter your first and last name:</p>
+        <input type="text" id="studentName" class="name-input" placeholder="e.g. Elena Smith">
+        <button onclick="nextPage()">Start Test</button>
+    </div>
+
+    <div id="page-1" class="page section-intro">
+        <h1>Vocabulary</h1>
+        <button onclick="nextPage()">Begin Section</button>
+    </div>
+
+    <div id="page-2" class="page">
+        <h2>Task 1: Complete each sentence with an appropriate word</h2>
+        <div id="t1-container"></div>
+        <div class="btn-container"><button onclick="nextPage()">Next Page</button></div>
+    </div>
+
+    <div id="page-3" class="page">
+        <h2>Task 2: Add the correct prefix (up-, down-, over- or under-)</h2>
+        <div id="t2-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="nextPage()">Next Page</button>
+        </div>
+    </div>
+
+    <div id="page-4" class="page section-intro">
+        <h1>LANGUAGE FOCUS</h1>
+        <button onclick="nextPage()">Begin Section</button>
+    </div>
+
+    <div id="page-5" class="page">
+        <h2>Task 3: Complete with words from the box</h2>
+        <p style="font-style: italic; color: #666; font-size: 18px; background: #eee; padding: 10px; border-radius: 8px;">all | both | enough | every | few | neither | one | several</p>
+        <div id="t3-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="nextPage()">Next Page</button>
+        </div>
+    </div>
+
+    <div id="page-6" class="page">
+        <h2>Task 4: Choose the correct follow-up sentence (A or B)</h2>
+        <div id="t4-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="nextPage()">Next Page</button>
+        </div>
+    </div>
+
+    <div id="page-7" class="page section-intro">
+        <h1>READING AND USE OF ENGLISH</h1>
+        <button onclick="nextPage()">Begin Section</button>
+    </div>
+
+    <div id="page-8" class="page">
+        <h2>Task 5: Open cloze (One word per gap)</h2>
+        <h3 style="color: var(--accent-teal);">The systematic investment plans</h3>
+        <div id="t5-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="finishTest()">Finish Test</button>
+        </div>
+    </div>
+
+    <div id="page-results" class="page">
+        <h2>Results</h2>
+        <p id="score-summary" style="font-size: 26px; font-weight: bold;"></p>
+        <div id="details"></div>
+    </div>
+</div>
+
+<script>
+// ОБНОВЛЕННАЯ ССЫЛКА
+const scriptURL = 'https://script.google.com/macros/s/AKfycbwbs7mZA2ehSO4vKbaVgi2m8boNqnfSpEN55bmBcaWs5cBTwpyU-xxA2UHVoy1Jiwd2kw/exec';
+let currentPage = 0;
+
+const task1Data = [
+    { s: "1. I was offered a small d", g: ["iscount"], e: " of 5% on the laptop." },
+    { s: "2. I got this case with my new phone for no e", g: ["xtra"], e: " charge." },
+    { s: "3. For a modest f", g: ["ee"], e: ", you can upgrade to the full version." },
+    { s: "4. According to the package, there's no l", g: ["imit"], e: " to the number of texts." },
+    { s: "5. You can exchange it or get a full r", g: ["efund"], e: "." },
+    { s: "6. The success was in large p", g: ["art"], e: " due to realistic graphics." },
+    { s: "7. I would have bought it, but the high c", g: ["ost"], e: " put me off." },
+    { s: "8. A great d", g: ["eal"], e: " of time and effort has gone into the software." }
+];
+
+const task2Data = [
+    { s: "1. I was running out of space, so I ", g: ["up"], e: "graded my account." },
+    { s: "2. Do you know any free games that I can ", g: ["down"], e: "load?" },
+    { s: "3. Our company is committed to ", g: ["up"], e: "holding the highest standards." },
+    { s: "4. They were ", g: ["over"], e: "ruled, meaning that the work will go ahead." },
+    { s: "5. The new software is ", g: ["under"], e: "going tests at the moment." },
+    { s: "6. The company plans to ", g: ["down"], e: "size staff numbers." }
+];
+
+const task3Data = [
+    { s: "1. We've got more than ", g: ["enough"], e: " TVs in this house." },
+    { s: "2. I've been to Paris on ", g: ["several"], e: " occasions." },
+    { s: "3. ", g: ["All"], e: " smartphones have the ability to access the internet." },
+    { s: "4. There are two ports. ", g: ["Neither"], e: " matches the cable." },
+    { s: "5. A new tablet comes out every ", g: ["few"], e: " years." },
+    { s: "6. What should I do with my old ", g: ["one"], e: "?" },
+    { s: "7. There are two cafés, and I'd say ", g: ["both"], e: " are very good." },
+    { s: "8. This is an amazing book in ", g: ["every"], e: " conceivable way." }
+];
+
+const task4Data = [
+    { s: "1. The company is to announce their new product tomorrow.", o: ["We'll know for sure whether or not this will happen very soon.", "The time of the announcement is scheduled for 4 pm."], a: "The time of the announcement is scheduled for 4 pm." },
+    { s: "2. My laptop will keep crashing.", o: ["I really should get it looked at.", "It's never done this before."], a: "I really should get it looked at." },
+    { s: "3. I'm about to go home.", o: ["I'll see you tomorrow.", "It depends on how much work I've got left to do."], a: "I'll see you tomorrow." },
+    { s: "4. The price of this type of phone is bound to go up.", o: ["But there's an equally likely chance that it won't.", "So, I'd buy one now if I were you."], a: "So, I'd buy one now if I were you." },
+    { s: "5. I'm planning on buying myself a smartwatch tomorrow.", o: ["But I don't know if I will.", "I've been saving up for ages."], a: "I've been saving up for ages." },
+    { s: "6. I hope I will get the job.", o: ["But I somehow doubt that I will.", "There's no doubt in my mind."], a: "But I somehow doubt that I will." }
+];
+
+const task5Data = [
+    { s: "As important as it is to cover expenses, it is essential to save (1) ", g: ["for"], e: " the future." },
+    { s: "Investment plans (2) ", g: ["come"], e: " in handy." },
+    { s: "More people are turning to mutual funds, (3) ", g: ["despite"], e: " the risk." },
+    { s: "SIPs are ideal for people (4) ", g: ["with"], e: " busy schedules." },
+    { s: "It involves investment each month (5) ", g: ["rather"], e: " than a lump sum." },
+    { s: "SIPs inculcate a sense (6) ", g: ["of"], e: " discipline." },
+    { s: "Fund units correspond to the amount (7) ", g: ["that", "which"], e: " one invests." },
+    { s: "Talk to a professional (8) ", g: ["before"], e: " making any purchase." }
+];
+
+function buildTest() {
+    const render = (containerId, data, prefix) => {
+        const cont = document.getElementById(containerId);
+        data.forEach((d, i) => {
+            cont.innerHTML += `<div class="task-item">${d.s}<input type="text" id="${prefix}-${i}" class="inline-input short-input">${d.e}</div>`;
+        });
+    };
+    render('t1-container', task1Data, 't1');
+    render('t2-container', task2Data, 't2');
+    render('t3-container', task3Data, 't3');
+    render('t5-container', task5Data, 't5');
+    const t4 = document.getElementById('t4-container');
+    task4Data.forEach((d, i) => {
+        const options = d.o.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+        t4.innerHTML += `<div class="task-item">${d.s}<br><select id="t4-${i}"><option value="">--- Choose ---</option>${options}</select></div>`;
+    });
+}
+
+function nextPage() {
+    if (currentPage === 0 && !document.getElementById('studentName').value.trim()) return alert("Please enter your name!");
+    document.getElementById(`page-${currentPage}`).classList.remove('active');
+    currentPage++;
+    document.getElementById(`page-${currentPage}`).classList.add('active');
+    window.scrollTo(0,0);
+}
+
+function prevPage() {
+    document.getElementById(`page-${currentPage}`).classList.remove('active');
+    currentPage--;
+    document.getElementById(`page-${currentPage}`).classList.add('active');
+}
+
+function finishTest() {
+    let score = 0; let total = 0; let log = [];
+    let table = `<table class="results-table"><tr><th>Task</th><th>Your Answer</th><th>Correct</th></tr>`;
+
+    const check = (data, prefix, getVal, getAns) => {
+        data.forEach((d, i) => {
+            total++;
+            const rawVal = getVal(i);
+            const val = rawVal.trim().toLowerCase();
+            const correctArr = Array.isArray(getAns(d)) ? getAns(d).map(c => c.toLowerCase()) : [getAns(d).toLowerCase()];
+            const isOk = correctArr.includes(val);
+            if (isOk) score++;
+            log.push(rawVal || "empty");
+            table += `<tr><td>${prefix} ${i+1}</td><td class="${isOk?'res-correct':'res-wrong'}">${rawVal||'-'}</td><td>${Array.isArray(getAns(d)) ? getAns(d).join('/') : getAns(d)}</td></tr>`;
+        });
+    };
+
+    check(task1Data, "Vocab 1", (i)=>document.getElementById(`t1-${i}`).value, (d)=>d.g);
+    check(task2Data, "Vocab 2", (i)=>document.getElementById(`t2-${i}`).value, (d)=>d.g);
+    check(task3Data, "Grammar 1", (i)=>document.getElementById(`t3-${i}`).value, (d)=>d.g);
+    check(task4Data, "Grammar 2", (i)=>document.getElementById(`t4-${i}`).value, (d)=>d.a);
+    check(task5Data, "Open Cloze", (i)=>document.getElementById(`t5-${i}`).value, (d)=>d.g);
+
+    const resultStr = `${score}/${total} (${Math.round(score/total*100)}%)`;
+    document.getElementById(`page-${currentPage}`).classList.remove('active');
+    document.getElementById('page-results').classList.add('active');
+    document.getElementById('score-summary').innerText = `Total Score: ${resultStr}`;
+    document.getElementById('details').innerHTML = table + `</table>`;
+
+    const params = new URLSearchParams();
+    params.append('name', document.getElementById('studentName').value);
+    params.append('result', resultStr);
+    params.append('title', "RfC1_Test_8");
+    params.append('answers', log.join(' | '));
+    fetch(scriptURL, { method: 'POST', body: params, mode: 'no-cors' });
+}
+buildTest();
+</script>
+</body>
+</html>
