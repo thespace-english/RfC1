@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RfC1_Test_10</title>
+    <style>
+        :root {
+            --bg-color: #f7faf7;
+            --accent-teal: #007e7a;
+            --text-dark: #1a1a1a;
+            --circle-color: rgba(0, 126, 122, 0.05);
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .decoration {
+            position: fixed; top: 0; right: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: -1;
+        }
+        .circle-big {
+            position: absolute; width: 450px; height: 450px; border-radius: 50%;
+            background: var(--circle-color); top: -100px; right: -100px;
+        }
+        .circle-small-1 {
+            position: absolute; width: 180px; height: 180px; border-radius: 50%;
+            background: var(--circle-color); top: 80px; right: 300px;
+        }
+        .circle-small-2 {
+            position: absolute; width: 120px; height: 120px; border-radius: 50%;
+            background: var(--circle-color); top: 250px; right: 180px;
+        }
+
+        #test-container {
+            width: 95%; max-width: 900px; background: white;
+            padding: 60px; margin: 40px 0; border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+            z-index: 1;
+        }
+
+        .page { display: none; }
+        .active { display: block; }
+
+        h1 { font-size: 54px; color: var(--accent-teal); margin-top: 0; }
+        h2 { font-size: 32px; margin-bottom: 30px; border-bottom: 2px solid var(--bg-color); padding-bottom: 15px; }
+        p { font-size: 20px; line-height: 1.6; }
+
+        .inline-input {
+            border: none; border-bottom: 2px solid var(--accent-teal);
+            background: #f1f5f1; padding: 2px 8px; font-size: 19px;
+            outline: none; margin: 0 4px; border-radius: 4px;
+            font-family: inherit;
+        }
+        
+        select {
+            padding: 4px; border: 1px solid var(--accent-teal); border-radius: 6px;
+            font-size: 18px; background: #fff; cursor: pointer; font-family: inherit;
+        }
+
+        .task-item { margin-bottom: 25px; font-size: 20px; line-height: 1.8; }
+        .full-text-block { background: #fdfdfd; padding: 25px; border: 1px solid #eee; border-radius: 12px; line-height: 2.2; font-size: 20px; }
+
+        .btn-container { margin-top: 50px; display: flex; gap: 20px; }
+        button {
+            background: var(--accent-teal); color: white; border: none;
+            padding: 18px 40px; font-size: 20px; border-radius: 12px;
+            cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        button:hover { background: #005f5c; }
+        .back-btn { background: #eee; color: #555; }
+
+        .chart-wrap { display: flex; flex-direction: column; align-items: center; margin: 40px 0; }
+        .pie-chart {
+            width: 220px; height: 220px; border-radius: 50%;
+            background: conic-gradient(var(--accent-teal) 0%, #eee 0%);
+            display: flex; align-items: center; justify-content: center;
+            position: relative; transition: 1s ease-out;
+        }
+        .pie-chart::after {
+            content: ""; position: absolute; width: 170px; height: 170px;
+            background: white; border-radius: 50%;
+        }
+        .chart-value { position: relative; z-index: 2; font-size: 32px; font-weight: bold; color: var(--accent-teal); }
+
+        .results-table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 17px; }
+        .results-table th, .results-table td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        .res-correct { color: #27ae60; font-weight: bold; }
+        .res-wrong { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="decoration">
+    <div class="circle-big"></div>
+    <div class="circle-small-1"></div>
+    <div class="circle-small-2"></div>
+</div>
+
+<div id="test-container">
+    <div id="page-0" class="page active">
+        <h1>RfC1 Test 10</h1>
+        <p>Please enter your first and last name:</p>
+        <input type="text" id="studentName" style="width:100%; padding:15px; font-size:20px; margin-bottom:20px; border: 2px solid #ddd; border-radius: 8px;" placeholder="e.g. John Smith">
+        <button onclick="nextPage()">Start Test</button>
+    </div>
+
+    <div id="page-1" class="page" style="text-align: center; padding-top: 50px;">
+        <h1>VOCABULARY</h1>
+        <button onclick="nextPage()">Begin Section</button>
+    </div>
+
+    <div id="page-2" class="page">
+        <h2>Task 1: Choose the correct options</h2>
+        <div id="t1-container"></div>
+        <div class="btn-container"><button onclick="nextPage()">Next Page</button></div>
+    </div>
+
+    <div id="page-3" class="page">
+        <h2>Task 2: Expressions with house and home</h2>
+        <p>Complete the sentences with one word in each gap.</p>
+        <div class="full-text-block" id="t2-container">
+            1. When Molly and I first met, we got on like a house on <input type="text" id="t2-0" class="inline-input" style="width:80px;">. We’ve got so much in common.<br>
+            2. After we’d finished our meal, the restaurant manager gave us a free dessert, <input type="text" id="t2-1" class="inline-input" style="width:60px;"> the house.<br>
+            3. It took me a while after hearing the news before reality <input type="text" id="t2-2" class="inline-input" style="width:80px;"> home. I was going to be a father!<br>
+            4. It was the funniest show I’ve ever seen. All the jokes were funny, but what they did at the end really <input type="text" id="t2-3" class="inline-input" style="width:120px;"> the house down.<br>
+            5. Please – just take your shoes off, sit down and <input type="text" id="t2-4" class="inline-input" style="width:100px;"> yourself at home.<br>
+            6. My brother loves his work. He says his office is like a home <input type="text" id="t2-5" class="inline-input" style="width:80px;"> from home.<br>
+            7. Why did Elisa’s comments hurt you so much? Perhaps they were a little bit too <input type="text" id="t2-6" class="inline-input" style="width:80px;"> to home.<br>
+            8. My dog has a huge appetite. If I’m not careful, it’ll eat me out of <input type="text" id="t2-7" class="inline-input" style="width:100px;"> and home.<br>
+            9. You have to try the tiramisu – it’s the <input type="text" id="t2-8" class="inline-input" style="width:100px;"> speciality and absolutely delicious.<br>
+            10. I don’t like going on holiday so much – I always miss my <input type="text" id="t2-9" class="inline-input" style="width:100px;"> comforts – my own bed, my TV, my kitchen...
+        </div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="nextPage()">Next Page</button>
+        </div>
+    </div>
+
+    <div id="page-4" class="page" style="text-align: center; padding-top: 50px;">
+        <h1>LANGUAGE FOCUS</h1>
+        <p>Participle clauses & Noun phrases</p>
+        <button onclick="nextPage()">Begin Section</button>
+    </div>
+
+    <div id="page-5" class="page">
+        <h2>Task 3: Participle clauses</h2>
+        <div id="t3-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="nextPage()">Next Page</button>
+        </div>
+    </div>
+
+    <div id="page-6" class="page">
+        <h2>Task 4: Choose the correct phrases</h2>
+        <div id="t4-container"></div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="nextPage()">Next Page</button>
+        </div>
+    </div>
+
+    <div id="page-7" class="page" style="text-align: center; padding-top: 50px;">
+        <h1>READING AND USE OF ENGLISH</h1>
+        <button onclick="nextPage()">Begin Section</button>
+    </div>
+
+    <div id="page-8" class="page">
+        <h2>Task 5: Multiple-choice cloze</h2>
+        <div class="full-text-block">
+            <b>Tree-house hotels</b><br>
+            Want to get off the (0) <b>beaten</b> track for your next vacation – literally? Once the (1) <select id="t5-0"><option value="">---</option><option value="A confined">A confined</option><option value="B narrow">B narrow</option><option value="C lonely">C lonely</option><option value="D sole">D sole</option></select> province of young boys, tree houses offer adventurous travellers a unique travel experience in an age of roadside motel chains and globe-stretching hotel corporations. <br>
+            Building a hotel in the treetops is (2) <select id="t5-1"><option value="">---</option><option value="A hardly">A hardly</option><option value="B barely">B barely</option><option value="C slightly">C slightly</option><option value="D faintly">D faintly</option></select> a new idea, but the concept has (3) <select id="t5-2"><option value="">---</option><option value="A unfolded">A unfolded</option><option value="B enriched">B enriched</option><option value="C burst">C burst</option><option value="D blossomed">D blossomed</option></select> today you’ll find them everywhere from Massachusetts to China. <br>
+            ‘A lot of people had good experiences with tree houses when they were growing up,’ explains Michael Garnier, a builder who has constructed tree-based (4) <select id="t5-3"><option value="">---</option><option value="A territories">A territories</option><option value="B dwellings">B dwellings</option><option value="C sites">C sites</option><option value="D berths">D berths</option></select> around the globe. ‘It (5) <select id="t5-4"><option value="">---</option><option value="A draws">A draws</option><option value="B drags">B drags</option><option value="C tows">C tows</option><option value="D hauls">D hauls</option></select> an adventurous type of person,’ he says. ‘The kid comes out in them.’ <br>
+            Sometimes, it’s the solitude and seclusion (6) <select id="t5-5"><option value="">---</option><option value="A caught">A caught</option><option value="B resulted">B resulted</option><option value="C afforded">C afforded</option><option value="D tendered">D tendered</option></select> by sleeping in nature that attracts people to tree-top hotels. Modern tree houses present a rare opportunity to (7) <select id="t5-6"><option value="">---</option><option value="A break">A break</option><option value="B escape">B escape</option><option value="C run">C run</option><option value="D come">D come</option></select> free of travel’s predictable stops and well-travelled routes. Up in the leaves, you’ll find something unique and exceptional – surely the (8) <select id="t5-7"><option value="">---</option><option value="A remuneration">A remuneration</option><option value="B reward">B reward</option><option value="C refund">C refund</option><option value="D return">D return</option></select> of any good journey.
+        </div>
+        <div class="btn-container">
+            <button class="back-btn" onclick="prevPage()">Back</button>
+            <button onclick="finishTest()">Finish Test</button>
+        </div>
+    </div>
+
+    <div id="page-results" class="page">
+        <h2>Results</h2>
+        <div class="chart-wrap">
+            <div class="pie-chart" id="chart-bg">
+                <div class="chart-value" id="perc-text">0%</div>
+            </div>
+            <p id="score-summary" style="font-size:26px; font-weight:bold; margin-top:20px;"></p>
+        </div>
+        <div id="details"></div>
+    </div>
+</div>
+
+<script>
+const scriptURL = 'https://script.google.com/macros/s/AKfycbwbs7mZA2ehSO4vKbaVgi2m8boNqnfSpEN55bmBcaWs5cBTwpyU-xxA2UHVoy1Jiwd2kw/exec';
+let currentPage = 0;
+
+const task1Data = [
+    { s: "1. We live in a/an {v} area with lots of trees and small parks.", o: ["A leafy", "B stuffy", "C airy"], a: "A leafy" },
+    { s: "2. When there’s a football match on, the town can get quite {v}, with people singing and shouting.", o: ["A dingy", "B cosy", "C rowdy"], a: "C rowdy" },
+    { s: "3. I’m not saying that I live in a {v} area, but people don’t usually go out alone at night.", o: ["A dodgy", "B cheerful", "C handy"], a: "A dodgy" },
+    { s: "4. The area Jenny lives in is {v}, with more expensive properties and a selection of fancy shops.", o: ["A cluttered", "B upmarket", "C run-down"], a: "B upmarket" },
+    { s: "5. Why is this street so {v}? These buildings could look beautiful if anyone bothered to repair them.", o: ["A tidy", "B run-down", "C laid-back"], a: "B run-down" },
+    { s: "6. Not everyone likes graffiti, but some of it has something to say and can make a place look {v}.", o: ["A steep", "B edgy", "C airy"], a: "B edgy" },
+    { s: "7. As I get older, I’d prefer to live somewhere more {v}. I don’t need clubs or restaurants.", o: ["A laid-back", "B dingy", "C cosy"], a: "A laid-back" },
+    { s: "8. I like living here. It’s not beautiful, but it’s {v} for the shops and public transport.", o: ["A cheerful", "B handy", "C cluttered"], a: "B handy" },
+    { s: "9. The price of renting an apartment here is quite {v}. Not many young people can afford it.", o: ["A tidy", "B airy", "C steep"], a: "C steep" },
+    { s: "10. I discovered a great {v} shop near me that sells clothes and furniture from the 1970s.", o: ["A retro", "B dodgy", "C rowdy"], a: "A retro" }
+];
+
+const task2Ans = ["fire", "on", "hit", "brought", "make", "away", "close", "house", "house", "home"];
+
+const task3Data = [
+    { p: "(not/be)", s: "1. {v} hungry, I decided to skip lunch.", a: "Not being" },
+    { p: "(go)", s: "2. {v} out recently, I saw that a lot of new cafes had opened.", a: "Going" },
+    { p: "(never/drive)", s: "3. {v} around such a busy city before, I felt very nervous.", a: "Never having driven" },
+    { p: "(locate)", s: "4. {v} right next to the train station, our offices are easy to reach.", a: "Located" },
+    { p: "(worry)", s: "5. {v} by what she had heard on the news, my mother called to check if I was OK.", a: "Worried" },
+    { p: "(decide)", s: "6. {v} that I needed a bigger salary, I started looking for a new job.", a: "Having decided" },
+    { p: "(know)", s: "7. {v} a little Spanish, I was able to communicate more or less when I went to Mexico.", a: "Knowing" },
+    { p: "(not/see)", s: "8. {v} for several decades, these colour photos are an amazing record.", a: "Not seen" },
+    { p: "(walk)", s: "9. {v} to work last week, we noticed many more things on the way.", a: "Walking" },
+    { p: "(be)", s: "10. {v} warned of the high crime rate in the area, Aria was always home before dark.", a: "Having been" }
+];
+
+const task4Data = [
+    { s: "1. I’ve already had three {v} this morning.", o: ["coffee cups", "cups of coffee", "coffee's cup"], a: "cups of coffee" },
+    { s: "2. Is there a reason why the {v} is so slow?", o: ["internet connection", "connection of the internet", "internet's connection"], a: "internet connection" },
+    { s: "3. I felt a huge {v} when I found out I’d got the job.", o: ["relief sense", "sense of relief", "relief's sense"], a: "sense of relief" },
+    { s: "4. Helping to save lives is all in {v} for a nurse.", o: ["a day work", "the work of a day", "a day’s work"], a: "a day’s work" },
+    { s: "5. Have you heard {v}?", o: ["today news", "the news of today", "today's news"], a: "today's news" },
+    { s: "6. I always feel sleepy at the {v}.", o: ["day end", "end of the day", "end's day"], a: "end of the day" },
+    { s: "7. I always carry a {v} with me.", o: ["refillable water bottle", "water of bottle", "water's bottle"], a: "refillable water bottle" },
+    { s: "8. The city centre is always very busy during the {v}.", o: ["rush hour", "hour of rush", "rush's hour"], a: "rush hour" },
+    { s: "9. I usually drink {v} these days.", o: ["coffee with almond milk", "milk of almonds", "almond's milk"], a: "coffee with almond milk" },
+    { s: "10. My daughter is {v} to me.", o: ["a pride source", "a source of pride", "pride's source"], a: "a source of pride" }
+];
+
+const task5Ans = ["A confined", "A hardly", "D blossomed", "B dwellings", "A draws", "C afforded", "A break", "B reward"];
+
+function build() {
+    const t1 = document.getElementById('t1-container');
+    task1Data.forEach((d, i) => {
+        const html = d.s.replace('{v}', `<select id="t1-${i}"><option value="">---</option>${d.o.map(o => `<option value="${o}">${o}</option>`).join('')}</select>`);
+        t1.innerHTML += `<div class="task-item">${html}</div>`;
+    });
+
+    const t3 = document.getElementById('t3-container');
+    task3Data.forEach((d, i) => {
+        const html = d.s.replace('{v}', `<input type="text" id="t3-${i}" class="inline-input" style="width:200px;">`);
+        t3.innerHTML += `<div class="task-item"><b>${d.p}</b> ${html}</div>`;
+    });
+
+    const t4 = document.getElementById('t4-container');
+    task4Data.forEach((d, i) => {
+        const html = d.s.replace('{v}', `<select id="t4-${i}"><option value="">---</option>${d.o.map(o => `<option value="${o}">${o}</option>`).join('')}</select>`);
+        t4.innerHTML += `<div class="task-item">${html}</div>`;
+    });
+}
+
+function nextPage() {
+    if (currentPage === 0 && !document.getElementById('studentName').value.trim()) return alert("Please enter your name!");
+    document.getElementById(`page-${currentPage}`).classList.remove('active');
+    currentPage++;
+    document.getElementById(`page-${currentPage}`).classList.add('active');
+    window.scrollTo(0,0);
+}
+
+function prevPage() {
+    document.getElementById(`page-${currentPage}`).classList.remove('active');
+    currentPage--;
+    document.getElementById(`page-${currentPage}`).classList.add('active');
+}
+
+function finishTest() {
+    let score = 0;
+    let total = 48;
+    let log = [];
+    let table = `<table class="results-table"><tr><th>№</th><th>Your Answer</th><th>Correct Answer</th></tr>`;
+
+    // Task 1
+    task1Data.forEach((d, i) => {
+        let val = document.getElementById(`t1-${i}`).value;
+        let isOk = val === d.a;
+        if(isOk) score++;
+        log.push(val || "no answer");
+        table += `<tr><td>1.${i+1}</td><td class="${isOk?'res-correct':'res-wrong'}">${val||'-'}</td><td>${d.a}</td></tr>`;
+    });
+
+    // Task 2
+    task2Ans.forEach((ans, i) => {
+        let val = document.getElementById(`t2-${i}`).value.trim();
+        let isOk = val.toLowerCase() === ans.toLowerCase();
+        if(isOk) score++;
+        log.push(val || "no answer");
+        table += `<tr><td>2.${i+1}</td><td class="${isOk?'res-correct':'res-wrong'}">${val||'-'}</td><td>${ans}</td></tr>`;
+    });
+
+    // Task 3
+    task3Data.forEach((d, i) => {
+        let val = document.getElementById(`t3-${i}`).value.trim();
+        let isOk = val.toLowerCase() === d.a.toLowerCase();
+        if(isOk) score++;
+        log.push(val || "no answer");
+        table += `<tr><td>3.${i+1}</td><td class="${isOk?'res-correct':'res-wrong'}">${val||'-'}</td><td>${d.a}</td></tr>`;
+    });
+
+    // Task 4
+    task4Data.forEach((d, i) => {
+        let val = document.getElementById(`t4-${i}`).value;
+        let isOk = val === d.a;
+        if(isOk) score++;
+        log.push(val || "no answer");
+        table += `<tr><td>4.${i+1}</td><td class="${isOk?'res-correct':'res-wrong'}">${val||'-'}</td><td>${d.a}</td></tr>`;
+    });
+
+    // Task 5
+    task5Ans.forEach((ans, i) => {
+        let val = document.getElementById(`t5-${i}`).value;
+        let isOk = val === ans;
+        if(isOk) score++;
+        log.push(val || "no answer");
+        table += `<tr><td>5.${i+1}</td><td class="${isOk?'res-correct':'res-wrong'}">${val||'-'}</td><td>${ans}</td></tr>`;
+    });
+
+    const perc = Math.round((score/total)*100);
+    const finalStr = `${score}/${total} (${perc}%)`;
+
+    document.getElementById('page-8').classList.remove('active');
+    document.getElementById('page-results').classList.add('active');
+    
+    // Анимация диаграммы
+    document.getElementById('chart-bg').style.background = `conic-gradient(var(--accent-teal) ${perc}%, #eee ${perc}%)`;
+    document.getElementById('perc-text').innerText = `${perc}%`;
+    document.getElementById('score-summary').innerText = `Your result: ${finalStr}`;
+    document.getElementById('details').innerHTML = table + `</table>`;
+
+    // Отправка в Google Таблицу
+    const p = new URLSearchParams();
+    p.append('name', document.getElementById('studentName').value);
+    p.append('result', finalStr);
+    p.append('title', "RfC1_Test_10");
+    p.append('answers', log.join(' | '));
+
+    fetch(scriptURL, { method: 'POST', body: p, mode: 'no-cors' });
+}
+
+build();
+</script>
+</body>
+</html>
