@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Trainer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { 
+            --bg-color: #f7faf7;
+            --accent-teal: #007e7a; 
+            --text-dark: #1a1a1a; 
+            --circle-color: rgba(0, 126, 122, 0.05); 
+            --white: #ffffff;
+            --error: #e74c3c;
+            --success: #27ae60;
+        }
+
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-dark); 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            font-size: 18px; /* Крупный основной шрифт */
+        }
+
+        .decoration { position: fixed; top:0; right: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; }
+        .circle-big { position: absolute; width:450px; height:450px; border-radius:50%; background:var(--circle-color); top: -100px; right: -100px; }
+        .circle-small-1 { position: absolute; width: 180px; height: 180px; border-radius: 50%; background: var(--circle-color); top: 80px; right: 300px; }
+        .circle-small-2 { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: var(--circle-color); top: 250px; right: 180px; }
+
+        .app-container { width: 100%; max-width: 850px; padding: 40px 20px; z-index: 1; }
+
+        #welcome-screen { text-align: center; background: var(--white); padding: 50px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); }
+        h1 { font-weight: 800; font-size: 32px; color: var(--accent-teal); }
+
+        .teal-input { 
+            padding: 18px; width: 300px; border: 3px solid #eee; border-radius: 15px; 
+            font-size: 18px; margin-bottom: 25px; outline: none; transition: 0.3s; font-family: inherit;
+        }
+        .teal-input:focus { border-color: var(--accent-teal); }
+        .btn-teal { 
+            background: var(--accent-teal); color: white; border: none; padding: 18px 50px; 
+            border-radius: 15px; cursor: pointer; font-size: 20px; font-weight: 800; transition: 0.3s;
+        }
+        .btn-teal:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        nav { display: none; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        nav button { 
+            background: white; border: 2px solid var(--accent-teal); color: var(--accent-teal);
+            padding: 12px 25px; border-radius: 50px; cursor: pointer; font-weight: 700; font-size: 16px;
+        }
+        nav button.active { background: var(--accent-teal); color: white; }
+
+        .page { display: none; background: white; padding: 40px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); }
+        .page.active { display: block; }
+
+        /* Task 1: Matching Pairs */
+        .matching-area { text-align: center; }
+        .matching-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .drop-zone { 
+            border: 3px dashed #dfe6e9; padding: 25px; border-radius: 20px; 
+            background: var(--circle-color); min-height: 80px; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; line-height: 1.4; transition: 0.3s;
+        }
+        .drop-zone.active-drop { border-color: var(--accent-teal); background: #ebf5fb; }
+        .word-pool { margin-top: 30px; display: flex; justify-content: center; gap: 20px; min-height: 60px; }
+        .word-card { 
+            padding: 15px 30px; background: var(--accent-teal); color: white; 
+            border-radius: 15px; cursor: grab; font-weight: 800; font-size: 20px;
+        }
+
+        /* Task 2: Table */
+        table { width: 100%; border-collapse: collapse; font-size: 18px; }
+        th, td { border: 1px solid #f0f0f0; padding: 15px; text-align: left; }
+        th { background: var(--circle-color); color: var(--accent-teal); }
+
+        /* Task 3: Sentences */
+        .sentence-row { margin-bottom: 20px; line-height: 1.8; font-size: 19px; padding-bottom: 15px; border-bottom: 2px solid #f9f9f9; }
+        select { 
+            padding: 8px 12px; border-radius: 10px; border: 2px solid var(--accent-teal); 
+            font-family: inherit; font-size: 18px; font-weight: 700; color: var(--accent-teal); cursor: pointer;
+        }
+
+        /* Results */
+        .results-container { text-align: center; }
+        canvas { max-width: 320px; margin: 0 auto 30px; }
+        .error-item { color: var(--error); margin-bottom: 15px; background: #fff5f5; padding: 15px; border-radius: 15px; }
+        .correct-variant { color: var(--success); font-weight: 800; }
+    </style>
+</head>
+<body>
+
+<div class="decoration">
+    <div class="circle-big"></div>
+    <div class="circle-small-1"></div>
+    <div class="circle-small-2"></div>
+</div>
+
+<div class="app-container">
+    <div id="welcome-screen">
+        <h1>Vocabulary Trainer</h1>
+        <p>Enter your name to begin the challenge:</p>
+        <input type="text" id="user-name" class="teal-input" placeholder="Name">
+        <br>
+        <button class="btn-teal" onclick="startApp()">Start Exercise</button>
+    </div>
+
+    <nav id="main-nav">
+        <button onclick="showPage('task1')" id="tab-task1">Task 1: Pair Matching</button>
+        <button onclick="showPage('task2')" id="tab-task2">Task 2: Glossary</button>
+        <button onclick="showPage('task3')" id="tab-task3">Task 3: Sentences</button>
+    </nav>
+
+    <div id="task1" class="page">
+        <h2>Match Pairs to Definitions</h2>
+        <div class="matching-area">
+            <p>Drag each word to its matching definition:</p>
+            <div class="matching-grid" id="matching-grid">
+                </div>
+            <div class="word-pool" id="word-pool">
+                </div>
+            <p id="t1-progress" style="margin-top:40px; font-weight:700; color:var(--accent-teal)"></p>
+        </div>
+    </div>
+
+    <div id="task2" class="page">
+        <h2>Reference Glossary</h2>
+        <div id="table-container"></div>
+    </div>
+
+    <div id="task3" class="page">
+        <h2>Complete the Sentences</h2>
+        <div id="sentences-container"></div>
+        <button class="btn-teal" id="finish-btn" style="margin-top:30px; width:100%" onclick="finishTest()">Finish and Send Results</button>
+    </div>
+
+    <div id="results" class="page">
+        <h2>Your Results</h2>
+        <div class="results-container">
+            <canvas id="resultsChart"></canvas>
+            <h3 id="score-text"></h3>
+            <div id="review-area" class="review-list"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbwbs7mZA2ehSO4vKbaVgi2m8boNqnfSpEN55bmBcaWs5cBTwpyU-xxA2UHVoy1Jiwd2kw/exec";
+    const TASK_TITLE = "RfC1_U9_alternatives_from_the_same_word-2";
+
+    const fullWordData = [
+        { word: "variables", def: "Factors or elements that are liable to change and can affect the result of an analysis.", pairId: 1 },
+        { word: "varieties", def: "Different types or sorts of something within a general category.", pairId: 1 },
+        { word: "economic", def: "Relating to the economy, finances, or the wealth of a country.", pairId: 2 },
+        { word: "economical", def: "Using money, resources, or time carefully and without waste.", pairId: 2 },
+        { word: "continuously", def: "Happening without any interruption or pause.", pairId: 3 },
+        { word: "continually", def: "Happening repeatedly and frequently, often in an annoying way.", pairId: 3 },
+        { word: "participation", def: "The act of taking part in an activity or event.", pairId: 4 },
+        { word: "participant", def: "A person who takes part in a specific activity.", pairId: 4 },
+        { word: "analyst", def: "A person whose job is to examine information or data in detail.", pairId: 5 },
+        { word: "analyses", def: "Detailed examinations of the elements or structure of something.", pairId: 5 },
+        { word: "specifics", def: "The precise details or small pieces of information about a subject.", pairId: 6 },
+        { word: "specifications", def: "A detailed description of the design and materials required for work.", pairId: 6 },
+        { word: "proceedings", def: "Legal action taken against someone in a court of law.", pairId: 7 },
+        { word: "procedure", def: "An established or official way of doing something.", pairId: 7 },
+        { word: "consumption", def: "The amount of something that is used or eaten.", pairId: 8 },
+        { word: "consumers", def: "People who buy goods and services for personal use.", pairId: 8 },
+        { word: "distinctly", def: "In a way that is very clear, definite, or unmistakable.", pairId: 9 },
+        { word: "distinctively", def: "In a way that serves to distinguish from others.", pairId: 9 },
+        { word: "creation", def: "The action or process of bringing something into existence.", pairId: 10 },
+        { word: "creativity", def: "The use of imagination or original ideas to create something.", pairId: 10 }
+    ];
+
+    const sentenceData = [
+        { id: 1, pairId: 1, correct: "variables", text: "The researcher identified three main ___ that influenced the outcome." },
+        { id: 2, pairId: 1, correct: "varieties", text: "The shop sells twenty different ___ of organic coffee beans." },
+        { id: 3, pairId: 2, correct: "economic", text: "The government is predicting a period of rapid ___ growth." },
+        { id: 4, pairId: 2, correct: "economical", text: "This new car is much more ___ than my previous one." },
+        { id: 5, pairId: 3, correct: "continuously", text: "The machine has been running ___ for 48 hours." },
+        { id: 6, pairId: 3, correct: "continually", text: "I wish you wouldn't ___ interrupt me when I'm speaking." },
+        { id: 7, pairId: 4, correct: "participation", text: "Student ___ in the seminar was higher than last year." },
+        { id: 8, pairId: 4, correct: "participant", text: "Each ___ will receive a folder containing all the documents." },
+        { id: 9, pairId: 5, correct: "analyst", text: "A financial ___ was hired to review the company's accounts." },
+        { id: 10, pairId: 5, correct: "analyses", text: "The report includes detailed ___ of the soil samples." },
+        { id: 11, pairId: 6, correct: "specifics", text: "I need to know the ___ of the contract before I sign it." },
+        { id: 12, pairId: 6, correct: "specifications", text: "The architect provided the ___ for the new building." },
+        { id: 13, pairId: 7, correct: "proceedings", text: "The ___ against the company lasted for over a year." },
+        { id: 14, pairId: 7, correct: "procedure", text: "The standard ___ for submitting a claim is found online." },
+        { id: 15, pairId: 8, correct: "consumption", text: "Gas ___ increases significantly during the winter months." },
+        { id: 16, pairId: 8, correct: "consumers", text: "Modern ___ are becoming more aware of environmental issues." },
+        { id: 17, pairId: 9, correct: "distinctly", text: "I ___ remember putting my keys on this table." },
+        { id: 18, pairId: 9, correct: "distinctively", text: "The bird has a ___ shaped beak that helps it catch insects." },
+        { id: 19, pairId: 10, correct: "creation", text: "The ___ of new jobs is the top priority for the council." },
+        { id: 20, pairId: 10, correct: "creativity", text: "Advertising agencies look for employees with high levels of ___." }
+    ];
+
+    let currentUserName = "";
+    let t1PairIndex = 1;
+    let matchedInCurrentPair = 0;
+
+    function startApp() {
+        const nameInput = document.getElementById('user-name').value;
+        if (!nameInput.trim()) return alert("Please enter your name");
+        currentUserName = nameInput;
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('main-nav').style.display = 'flex';
+        initTasks();
+        showPage('task1');
+    }
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        document.getElementById('tab-' + pageId)?.classList.add('active');
+    }
+
+    function initTasks() {
+        initTask1();
+        initTask2();
+        initTask3();
+    }
+
+    // --- Task 1: Matching Logic (Grouped by Pairs) ---
+    function initTask1() {
+        const grid = document.getElementById('matching-grid');
+        const pool = document.getElementById('word-pool');
+        const progress = document.getElementById('t1-progress');
+        
+        if (t1PairIndex > 10) {
+            grid.innerHTML = "<div style='grid-column: 1/3'><h3>Task Complete! Go to Practice.</h3></div>";
+            pool.innerHTML = "";
+            return;
+        }
+
+        const currentPairWords = fullWordData.filter(w => w.pairId === t1PairIndex);
+        const shuffledWords = [...currentPairWords].sort(() => Math.random() - 0.5);
+        const shuffledDefs = [...currentPairWords].sort(() => Math.random() - 0.5);
+
+        matchedInCurrentPair = 0;
+        grid.innerHTML = "";
+        pool.innerHTML = "";
+
+        shuffledDefs.forEach(item => {
+            const dropZone = document.createElement('div');
+            dropZone.className = 'drop-zone';
+            dropZone.id = `drop-${item.word}`;
+            dropZone.innerText = item.def;
+            dropZone.setAttribute('ondrop', 'drop(event)');
+            dropZone.setAttribute('ondragover', 'allowDrop(event)');
+            grid.appendChild(dropZone);
+        });
+
+        shuffledWords.forEach(item => {
+            const wordCard = document.createElement('div');
+            wordCard.className = 'word-card';
+            wordCard.id = `drag-${item.word}`;
+            wordCard.innerText = item.word;
+            wordCard.setAttribute('draggable', 'true');
+            wordCard.setAttribute('ondragstart', 'drag(event)');
+            pool.appendChild(wordCard);
+        });
+
+        progress.innerText = `Pair ${t1PairIndex} of 10`;
+    }
+
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+    function drop(ev) {
+        ev.preventDefault();
+        const draggedId = ev.dataTransfer.getData("text");
+        const draggedWord = draggedId.replace('drag-', '');
+        const targetId = ev.target.id.replace('drop-', '');
+
+        if (draggedWord === targetId) {
+            const card = document.getElementById(draggedId);
+            ev.target.innerHTML = `<span style="color:var(--success)"><b>${draggedWord.toUpperCase()}</b>:</span><br>${ev.target.innerText}`;
+            ev.target.style.borderColor = "var(--success)";
+            ev.target.style.background = "#fff";
+            card.style.visibility = "hidden";
+            matchedInCurrentPair++;
+            
+            if (matchedInCurrentPair === 2) {
+                setTimeout(() => {
+                    t1PairIndex++;
+                    initTask1();
+                }, 800);
+            }
+        }
+    }
+
+    // --- Task 2: Glossary ---
+    function initTask2() {
+        let html = `<table><tr><th>Word</th><th>Definition</th></tr>`;
+        fullWordData.forEach(item => {
+            html += `<tr><td><strong>${item.word}</strong></td><td>${item.def}</td></tr>`;
+        });
+        html += `</table>`;
+        document.getElementById('table-container').innerHTML = html;
+    }
+
+    // --- Task 3: Sentences ---
+    function initTask3() {
+        const arr = [...sentenceData].sort(() => Math.random() - 0.5);
+        // Простая проверка соседства
+        for(let i=0; i<arr.length-1; i++) {
+            if(arr[i].pairId === arr[i+1].pairId) {
+                [arr[i+1], arr[(i+2)%arr.length]] = [arr[(i+2)%arr.length], arr[i+1]];
+            }
+        }
+
+        const container = document.getElementById('sentences-container');
+        let html = "";
+        arr.forEach((s, idx) => {
+            const options = fullWordData.filter(w => w.pairId === s.pairId).map(w => w.word);
+            html += `<div class="sentence-row">
+                ${idx + 1}. ${s.text.replace('___', `
+                <select id="q-${idx}" data-correct="${s.correct}" data-text="${s.text}">
+                    <option value="">--select--</option>
+                    <option value="${options[0]}">${options[0]}</option>
+                    <option value="${options[1]}">${options[1]}</option>
+                </select>`)}
+            </div>`;
+        });
+        container.innerHTML = html;
+        this.shuffledPractice = arr;
+    }
+
+    async function finishTest() {
+        let score = 0;
+        let incorrect = [];
+        let answersArr = [];
+        const selects = document.querySelectorAll('#task3 select');
+
+        selects.forEach((sel) => {
+            const val = sel.value;
+            const correct = sel.getAttribute('data-correct');
+            const originalText = sel.getAttribute('data-text');
+            
+            answersArr.push(val || "None");
+            if (val === correct) {
+                score++;
+            } else {
+                incorrect.push({ 
+                    q: originalText.replace('___', `[${val || '...'}]`), 
+                    correct: correct 
+                });
+            }
+        });
+
+        showResults(score, incorrect, selects.length);
+        
+        // Data to Sheet
+        const payload = {
+            name: currentUserName,
+            title: TASK_TITLE,
+            result: `${score}/${selects.length}`,
+            answers: answersArr.join('; ')
+        };
+
+        fetch(GOOGLE_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: new URLSearchParams(payload)
+        }).catch(e => console.log("Network error"));
+    }
+
+    function showResults(score, incorrect, total) {
+        showPage('results');
+        document.getElementById('main-nav').style.display = 'none';
+        document.getElementById('score-text').innerText = `Final Score: ${score} / ${total}`;
+
+        new Chart(document.getElementById('resultsChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Correct', 'Incorrect'],
+                datasets: [{
+                    data: [score, total - score],
+                    backgroundColor: ['#27ae60', '#e74c3c'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { labels: { font: { family: 'Nunito', size: 16 } } } } }
+        });
+
+        const reviewArea = document.getElementById('review-area');
+        if (incorrect.length > 0) {
+            reviewArea.innerHTML = "<h4>Review your mistakes:</h4>";
+            incorrect.forEach(item => {
+                reviewArea.innerHTML += `<div class="error-item">
+                    ${item.q} <br> Correct: <span class="correct-variant">${item.correct}</span>
+                </div>`;
+            });
+        } else {
+            reviewArea.innerHTML = "<h4>Excellent! Everything is correct.</h4>";
+        }
+    }
+</script>
+</body>
+</html>
